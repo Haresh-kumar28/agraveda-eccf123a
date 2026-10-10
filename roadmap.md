@@ -1,5 +1,5 @@
-- [ ] Preserve original forecast, pressure, bottleneck, quality, recommendation and what-if engines.
-- [ ] Build public landing and supporting product, workflow, hospital, security and contact pages.
-- [ ] Build clearly labelled demo login/signup, role model and access boundary.
-- [ ] Build all eight working application sections with shared controls.
-- [ ] Document production-auth caveats and verify calculations, routes and mobile layout.
+- [x] Preserve original forecast, pressure, bottleneck, quality, recommendation and what-if engines.
+- [x] Build public landing and supporting product, workflow, hospital, security and contact pages.
+- [x] Build clearly labelled demo login/signup, role model and access boundary.
+- [x] Build all eight working application sections with shared controls.
+- [x] Document production-auth caveats and verify calculations, routes and mobile layout.

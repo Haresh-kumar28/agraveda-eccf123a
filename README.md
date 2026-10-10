@@ -31,6 +31,8 @@ Only strict-TypeScript empty-array guards and typed cleaning assignments were ad
 
 Original limitations remain visible: diagnostic capacity is fixed at 10 in the engine; the previously ineffective diagnostic input is intentionally disabled. Nurses 1:4 and doctors 1:6 are modeling assumptions, not clinical standards. Outbreak/custom use normal historical forecast patterns with adjusted inputs. The original simulator can differ from baseline even with zero adjustments because it uses separate projection formulas; reset clears adjustments, not this modeling behavior.
 
+Additional preserved limitations: departures are tied to arrivals; staffing utilization divides by required rather than available staffing; bed availability uses a legacy 85% occupied-bed adjustment and required beds use 90% of projected occupancy. MAE/RMSE backtesting includes target arrivals as inputs and is therefore not an independent validation. These limitations are surfaced, not silently replaced with new medical modeling. Editing total bed capacity recomputes availability consistently; reset restores the original synthetic fixture.
+
 ## Demo authentication and role model
 
 `src/features/auth.tsx` exposes AuthService and AuthProvider. Demo sessions contain only name, role and `mode: demo`, stored in sessionStorage for the browser tab. Passwords and registration values are never persisted. The email forms explicitly return unconfigured errors. Google is disabled and labelled coming soon. Password reset does not claim to send mail.
