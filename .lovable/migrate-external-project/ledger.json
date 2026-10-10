@@ -1,0 +1,33 @@
+{
+  "source": "https://github.com/Haresh-kumar28/AgraVeda",
+  "capabilities": [
+    {
+      "capability": "Calculation engines and synthetic records",
+      "source": "src/engines and src/data",
+      "outcome": "Preserve original browser-safe engines",
+      "status": "verified",
+      "next_action": "None"
+    },
+    {
+      "capability": "Identity and authorization",
+      "source": "Absent in original repository",
+      "outcome": "Explicit demo access with integration-ready service",
+      "status": "verified",
+      "next_action": "None for the requested demo; production identity and private hospital data require a separately reviewed integration"
+    },
+    {
+      "capability": "Database, storage, providers, schedules and callbacks",
+      "source": "Inspection found none",
+      "outcome": "No external production services to migrate",
+      "status": "not_applicable",
+      "next_action": "None"
+    },
+    {
+      "capability": "Routes and verification",
+      "source": "Eight original product screens",
+      "outcome": "TanStack routes with preserved domain concepts",
+      "status": "verified",
+      "next_action": "None"
+    }
+  ]
+}

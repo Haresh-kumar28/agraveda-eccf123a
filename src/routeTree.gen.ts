@@ -10,33 +10,273 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ForHospitalsRouteImport } from './routes/for-hospitals'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProductRouteImport } from './routes/product'
+import { Route as SecurityRouteImport } from './routes/security'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAccessDeniedRouteImport } from './routes/app.access-denied'
+import { Route as AppDataQualityRouteImport } from './routes/app.data-quality'
+import { Route as AppDecisionsRouteImport } from './routes/app.decisions'
+import { Route as AppForecastRouteImport } from './routes/app.forecast'
+import { Route as AppPatientFlowRouteImport } from './routes/app.patient-flow'
+import { Route as AppResourcesRouteImport } from './routes/app.resources'
+import { Route as AppScenariosRouteImport } from './routes/app.scenarios'
+import { Route as AppWhatIfRouteImport } from './routes/app.what-if'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForHospitalsRoute = ForHospitalsRouteImport.update({
+  id: '/for-hospitals',
+  path: '/for-hospitals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductRoute = ProductRouteImport.update({
+  id: '/product',
+  path: '/product',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAccessDeniedRoute = AppAccessDeniedRouteImport.update({
+  id: '/access-denied',
+  path: '/access-denied',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDataQualityRoute = AppDataQualityRouteImport.update({
+  id: '/data-quality',
+  path: '/data-quality',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDecisionsRoute = AppDecisionsRouteImport.update({
+  id: '/decisions',
+  path: '/decisions',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppForecastRoute = AppForecastRouteImport.update({
+  id: '/forecast',
+  path: '/forecast',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPatientFlowRoute = AppPatientFlowRouteImport.update({
+  id: '/patient-flow',
+  path: '/patient-flow',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppResourcesRoute = AppResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppScenariosRoute = AppScenariosRouteImport.update({
+  id: '/scenarios',
+  path: '/scenarios',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppWhatIfRoute = AppWhatIfRouteImport.update({
+  id: '/what-if',
+  path: '/what-if',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/contact': typeof ContactRoute
+  '/for-hospitals': typeof ForHospitalsRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/product': typeof ProductRoute
+  '/security': typeof SecurityRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/app/access-denied': typeof AppAccessDeniedRoute
+  '/app/data-quality': typeof AppDataQualityRoute
+  '/app/decisions': typeof AppDecisionsRoute
+  '/app/forecast': typeof AppForecastRoute
+  '/app/patient-flow': typeof AppPatientFlowRoute
+  '/app/resources': typeof AppResourcesRoute
+  '/app/scenarios': typeof AppScenariosRoute
+  '/app/what-if': typeof AppWhatIfRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
+  '/for-hospitals': typeof ForHospitalsRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/product': typeof ProductRoute
+  '/security': typeof SecurityRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/app/access-denied': typeof AppAccessDeniedRoute
+  '/app/data-quality': typeof AppDataQualityRoute
+  '/app/decisions': typeof AppDecisionsRoute
+  '/app/forecast': typeof AppForecastRoute
+  '/app/patient-flow': typeof AppPatientFlowRoute
+  '/app/resources': typeof AppResourcesRoute
+  '/app/scenarios': typeof AppScenariosRoute
+  '/app/what-if': typeof AppWhatIfRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/contact': typeof ContactRoute
+  '/for-hospitals': typeof ForHospitalsRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/product': typeof ProductRoute
+  '/security': typeof SecurityRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/app/access-denied': typeof AppAccessDeniedRoute
+  '/app/data-quality': typeof AppDataQualityRoute
+  '/app/decisions': typeof AppDecisionsRoute
+  '/app/forecast': typeof AppForecastRoute
+  '/app/patient-flow': typeof AppPatientFlowRoute
+  '/app/resources': typeof AppResourcesRoute
+  '/app/scenarios': typeof AppScenariosRoute
+  '/app/what-if': typeof AppWhatIfRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/contact'
+    | '/for-hospitals'
+    | '/how-it-works'
+    | '/login'
+    | '/privacy'
+    | '/product'
+    | '/security'
+    | '/signup'
+    | '/terms'
+    | '/app/access-denied'
+    | '/app/data-quality'
+    | '/app/decisions'
+    | '/app/forecast'
+    | '/app/patient-flow'
+    | '/app/resources'
+    | '/app/scenarios'
+    | '/app/what-if'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/contact'
+    | '/for-hospitals'
+    | '/how-it-works'
+    | '/login'
+    | '/privacy'
+    | '/product'
+    | '/security'
+    | '/signup'
+    | '/terms'
+    | '/app/access-denied'
+    | '/app/data-quality'
+    | '/app/decisions'
+    | '/app/forecast'
+    | '/app/patient-flow'
+    | '/app/resources'
+    | '/app/scenarios'
+    | '/app/what-if'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/contact'
+    | '/for-hospitals'
+    | '/how-it-works'
+    | '/login'
+    | '/privacy'
+    | '/product'
+    | '/security'
+    | '/signup'
+    | '/terms'
+    | '/app/access-denied'
+    | '/app/data-quality'
+    | '/app/decisions'
+    | '/app/forecast'
+    | '/app/patient-flow'
+    | '/app/resources'
+    | '/app/scenarios'
+    | '/app/what-if'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  ContactRoute: typeof ContactRoute
+  ForHospitalsRoute: typeof ForHospitalsRoute
+  HowItWorksRoute: typeof HowItWorksRoute
+  LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ProductRoute: typeof ProductRoute
+  SecurityRoute: typeof SecurityRoute
+  SignupRoute: typeof SignupRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +288,180 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-hospitals': {
+      id: '/for-hospitals'
+      path: '/for-hospitals'
+      fullPath: '/for-hospitals'
+      preLoaderRoute: typeof ForHospitalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/product': {
+      id: '/product'
+      path: '/product'
+      fullPath: '/product'
+      preLoaderRoute: typeof ProductRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/access-denied': {
+      id: '/app/access-denied'
+      path: '/access-denied'
+      fullPath: '/app/access-denied'
+      preLoaderRoute: typeof AppAccessDeniedRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/data-quality': {
+      id: '/app/data-quality'
+      path: '/data-quality'
+      fullPath: '/app/data-quality'
+      preLoaderRoute: typeof AppDataQualityRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/decisions': {
+      id: '/app/decisions'
+      path: '/decisions'
+      fullPath: '/app/decisions'
+      preLoaderRoute: typeof AppDecisionsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/forecast': {
+      id: '/app/forecast'
+      path: '/forecast'
+      fullPath: '/app/forecast'
+      preLoaderRoute: typeof AppForecastRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/patient-flow': {
+      id: '/app/patient-flow'
+      path: '/patient-flow'
+      fullPath: '/app/patient-flow'
+      preLoaderRoute: typeof AppPatientFlowRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/resources': {
+      id: '/app/resources'
+      path: '/resources'
+      fullPath: '/app/resources'
+      preLoaderRoute: typeof AppResourcesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/scenarios': {
+      id: '/app/scenarios'
+      path: '/scenarios'
+      fullPath: '/app/scenarios'
+      preLoaderRoute: typeof AppScenariosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/what-if': {
+      id: '/app/what-if'
+      path: '/what-if'
+      fullPath: '/app/what-if'
+      preLoaderRoute: typeof AppWhatIfRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppAccessDeniedRoute: typeof AppAccessDeniedRoute
+  AppDataQualityRoute: typeof AppDataQualityRoute
+  AppDecisionsRoute: typeof AppDecisionsRoute
+  AppForecastRoute: typeof AppForecastRoute
+  AppPatientFlowRoute: typeof AppPatientFlowRoute
+  AppResourcesRoute: typeof AppResourcesRoute
+  AppScenariosRoute: typeof AppScenariosRoute
+  AppWhatIfRoute: typeof AppWhatIfRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAccessDeniedRoute: AppAccessDeniedRoute,
+  AppDataQualityRoute: AppDataQualityRoute,
+  AppDecisionsRoute: AppDecisionsRoute,
+  AppForecastRoute: AppForecastRoute,
+  AppPatientFlowRoute: AppPatientFlowRoute,
+  AppResourcesRoute: AppResourcesRoute,
+  AppScenariosRoute: AppScenariosRoute,
+  AppWhatIfRoute: AppWhatIfRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  ContactRoute: ContactRoute,
+  ForHospitalsRoute: ForHospitalsRoute,
+  HowItWorksRoute: HowItWorksRoute,
+  LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
+  ProductRoute: ProductRoute,
+  SecurityRoute: SecurityRoute,
+  SignupRoute: SignupRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
