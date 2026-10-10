@@ -44,8 +44,11 @@ export function detectOutliers(data: EDRecord[]): { field: string; index: number
 export function validateTimestamps(data: EDRecord[]): number {
   let issues = 0;
   for (let i = 1; i < data.length; i++) {
-    const curr = new Date(data[i].timestamp).getTime();
-    const prev = new Date(data[i - 1].timestamp).getTime();
+    const currentRecord = data[i];
+    const previousRecord = data[i - 1];
+    if (!currentRecord || !previousRecord) continue;
+    const curr = new Date(currentRecord.timestamp).getTime();
+    const prev = new Date(previousRecord.timestamp).getTime();
     if (curr < prev) {
       issues++;
     } else if (curr - prev > 2 * 60 * 60 * 1000) {
@@ -58,27 +61,29 @@ export function validateTimestamps(data: EDRecord[]): number {
 export function cleanData(data: EDRecord[]): EDRecord[] {
   if (data.length === 0) return [];
   const cleaned = data.map(r => ({ ...r }));
-  const numericFields: (keyof EDRecord)[] = ['arrivals', 'currentOccupancy', 'waitingPatients', 'availableBeds', 'averageWaitTime'];
+  const numericFields = ['arrivals', 'currentOccupancy', 'waitingPatients', 'availableBeds', 'averageWaitTime'] as const;
   
   const outliers = detectOutliers(cleaned);
   const outlierMap = new Set(outliers.map(o => `${o.index}-${o.field}`));
 
   for (let i = 0; i < cleaned.length; i++) {
+    const record = cleaned[i];
+    if (!record) continue;
     for (const field of numericFields) {
-      const isMissing = cleaned[i][field] === null || cleaned[i][field] === undefined || Number.isNaN(cleaned[i][field]);
+      const isMissing = record[field] === null || record[field] === undefined || Number.isNaN(record[field]);
       const isOutlier = outlierMap.has(`${i}-${field}`);
 
       if (isMissing || isOutlier) {
         // Last known good value
         let fallbackVal = 0;
         for (let j = i - 1; j >= 0; j--) {
-          const val = cleaned[j][field];
+          const val = cleaned[j]?.[field];
           if (val !== null && val !== undefined && !Number.isNaN(val) && !outlierMap.has(`${j}-${field}`)) {
             fallbackVal = Number(val);
             break;
           }
         }
-        (cleaned[i][field] as any) = fallbackVal;
+        record[field] = fallbackVal;
       }
     }
   }

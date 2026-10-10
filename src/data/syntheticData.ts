@@ -118,7 +118,9 @@ export function generateSyntheticData(): EDRecord[] {
 }
 
 export function getLatestRecord(data: EDRecord[]): EDRecord {
-  return data[data.length - 1];
+  const latest = data.at(-1);
+  if (!latest) throw new Error('No operational records available.');
+  return latest;
 }
 
 export function getRecentRecords(data: EDRecord[], hours: number): EDRecord[] {

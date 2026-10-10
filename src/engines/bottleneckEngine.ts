@@ -110,12 +110,14 @@ export function analyzeBottlenecks(currentRecord: EDRecord, forecasts: ForecastP
   
   // Primary
   all.sort((a, b) => b.projectedUtilization - a.projectedUtilization);
-  all[0].isPrimary = true;
+  const primary = all[0];
+  if (!primary) throw new Error('No resource constraints were calculated.');
+  primary.isPrimary = true;
   
   return {
-    primary: all[0],
+    primary,
     all,
-    primaryBottleneck: all[0],
+    primaryBottleneck: primary,
     resources: all
   };
 }
