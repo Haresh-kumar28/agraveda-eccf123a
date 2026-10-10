@@ -1,15 +1,187 @@
-import {Link} from '@tanstack/react-router';
-import {ArrowRight,ShieldCheck} from 'lucide-react';
-import {Button} from '@/components/ui/button';
-import {SiteHeader,SiteFooter,DemoCTA,stages} from './site';
-const content={
- product:{eyebrow:'The AgraVeda platform',title:'A connected view of emergency operations.',lead:'Forecast demand, understand patient-flow bottlenecks and compare resource options — with a clear view of the assumptions behind every result.',blocks:[['Forecast demand','The original weighted engine combines historical hourly patterns (40%), recent trends (35%) and current arrivals (25%). Forecasts extend six hours ahead, with qualitative confidence and error metrics.'],['Understand patient flow','See seven stages from arrival to disposition. Resource gaps are calculated across beds, nurses, doctors and diagnostics, with the strongest constraint highlighted.'],['Compare operational options','Adjust beds, staffing and demand in the what-if simulator. Compare estimated occupancy, waiting time and pressure without changing baseline inputs.']]},
- 'how-it-works':{eyebrow:'From signals to a shared decision',title:'Clarity, one step at a time.',lead:'AgraVeda keeps the calculation chain visible, so your team can understand both the output and the inputs that produced it.',blocks:[['01 · Understand your data','The demo starts with 336 synthetic hourly operational records. Data-quality checks cover completeness, timestamp continuity and outliers.'],['02 · See the emerging pressure','Editable inputs feed the demand forecast, then pressure and resource bottleneck calculations. All sections share the same inputs.'],['03 · Compare, discuss, decide','Review recommendation rationale. Test staffing or capacity changes and compare modeled outcomes. Decisions always remain with your qualified hospital team.']]},
- 'for-hospitals':{eyebrow:'Built around your team',title:'Different perspectives. One operational picture.',lead:'A common language for capacity planning — from the emergency department to hospital administration.',blocks:[['Hospital and ED leaders','Explore every operational section, compare scenarios and coordinate resource planning with a clear view of current and projected pressure.'],['Clinicians and care coordinators','View department pressure, patient flow and operational recommendations. The demo intentionally hides planning and data-management controls for these roles.'],['Data analysts','Explore forecasts, patient flow, scenarios, what-if analysis and data quality. Demo analysts do not have resource-management or decision access.']]},
- security:{eyebrow:'Transparency before promises',title:'Trust begins with clear boundaries.',lead:'This is a functional product demo, not a production deployment for protected hospital data. Here is what is available now — and what must happen before a hospital rollout.',blocks:[['Available in this demo','Synthetic, aggregate operational records only. Passwords are never saved. A demo session and chosen role are kept in this browser tab. No patient identifiers or hospital integrations are present.'],['Production requirements','Connect a verified identity service, enforce roles on the server, add tenant isolation, audit logs, session policies and a reviewed hospital-data connection. Complete privacy, retention and organizational security reviews.'],['No implied certifications','No claims of HIPAA, GDPR certification, SOC 2, clinical validation or enterprise security are made. Demo role checks are interface examples, not a production security boundary.']]},
- contact:{eyebrow:'Start a conversation',title:'Let’s make the next shift clearer.',lead:'Explore the demo with your team and evaluate whether AgraVeda’s operational workflows match your hospital’s needs.',blocks:[['Evaluate the workflow','Walk through the six-hour forecast, patient-flow constraints and resource scenarios with your ED and operations teams.'],['Plan a pilot','Identify the operational data, governance requirements and identity integration needed for a reviewed hospital pilot.'],['Contact availability','A contact channel has not been configured yet. No invented email address, phone number or unconnected message form is provided. For now, explore the demo workspace.']]},
- privacy:{eyebrow:'Demo privacy notice',title:'Your information, clearly explained.',lead:'This notice describes the current demo only. A hospital-ready privacy policy must be reviewed before production use.',blocks:[['Demo information','The application uses synthetic hourly operational records. It does not collect patient data. Demo role and session state are stored in sessionStorage for this browser tab.'],['Form information','Sign-in and registration are not connected. Submitted form values do not create an account and are not saved by this application. Do not enter real passwords or sensitive information.'],['Before production','Define a data controller, legal basis, retention and deletion policies, privacy contact, subprocessors and organizational agreements. Obtain the required reviews before connecting hospital data.']]},
- terms:{eyebrow:'Demo terms',title:'Explore thoughtfully. Decide responsibly.',lead:'AgraVeda is operational decision support — not clinical advice. These demo terms are not a substitute for a reviewed production agreement.',blocks:[['For evaluation only','All records are synthetic. Model outputs and scenarios are illustrative and must not be used to make patient-care or live hospital staffing decisions.'],['Human judgment','Forecasts and recommendations use simplified operational assumptions. They are not clinically validated and may not reflect your hospital’s real constraints.'],['Production use','Requires verified identity, server-enforced authorization, appropriate data agreements and formal security and clinical-governance review. No production service commitments are currently offered.']]}
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SiteHeader, SiteFooter, DemoCTA, stages } from "./site";
+const content = {
+  product: {
+    eyebrow: "The AgraVeda platform",
+    title: "A connected view of emergency operations.",
+    lead: "Forecast demand, understand patient-flow bottlenecks and compare resource options — with a clear view of the assumptions behind every result.",
+    blocks: [
+      [
+        "Forecast demand",
+        "The original weighted engine combines historical hourly patterns (40%), recent trends (35%) and current arrivals (25%). Forecasts extend six hours ahead, with qualitative confidence and error metrics.",
+      ],
+      [
+        "Understand patient flow",
+        "See seven stages from arrival to disposition. Resource gaps are calculated across beds, nurses, doctors and diagnostics, with the strongest constraint highlighted.",
+      ],
+      [
+        "Compare operational options",
+        "Adjust beds, staffing and demand in the what-if simulator. Compare estimated occupancy, waiting time and pressure without changing baseline inputs.",
+      ],
+    ],
+  },
+  "how-it-works": {
+    eyebrow: "From signals to a shared decision",
+    title: "Clarity, one step at a time.",
+    lead: "AgraVeda keeps the calculation chain visible, so your team can understand both the output and the inputs that produced it.",
+    blocks: [
+      [
+        "01 · Understand your data",
+        "The demo starts with 336 synthetic hourly operational records. Data-quality checks cover completeness, timestamp continuity and outliers.",
+      ],
+      [
+        "02 · See the emerging pressure",
+        "Editable inputs feed the demand forecast, then pressure and resource bottleneck calculations. All sections share the same inputs.",
+      ],
+      [
+        "03 · Compare, discuss, decide",
+        "Review recommendation rationale. Test staffing or capacity changes and compare modeled outcomes. Decisions always remain with your qualified hospital team.",
+      ],
+    ],
+  },
+  "for-hospitals": {
+    eyebrow: "Built around your team",
+    title: "Different perspectives. One operational picture.",
+    lead: "A common language for capacity planning — from the emergency department to hospital administration.",
+    blocks: [
+      [
+        "Hospital and ED leaders",
+        "Explore every operational section, compare scenarios and coordinate resource planning with a clear view of current and projected pressure.",
+      ],
+      [
+        "Clinicians and care coordinators",
+        "View department pressure, patient flow and operational recommendations. The demo intentionally hides planning and data-management controls for these roles.",
+      ],
+      [
+        "Data analysts",
+        "Explore forecasts, patient flow, scenarios, what-if analysis and data quality. Demo analysts do not have resource-management or decision access.",
+      ],
+    ],
+  },
+  security: {
+    eyebrow: "Transparency before promises",
+    title: "Trust begins with clear boundaries.",
+    lead: "This is a functional product demo, not a production deployment for protected hospital data. Here is what is available now — and what must happen before a hospital rollout.",
+    blocks: [
+      [
+        "Available in this demo",
+        "Synthetic, aggregate operational records only. Passwords are never saved. A demo session and chosen role are kept in this browser tab. No patient identifiers or hospital integrations are present.",
+      ],
+      [
+        "Production requirements",
+        "Connect a verified identity service, enforce roles on the server, add tenant isolation, audit logs, session policies and a reviewed hospital-data connection. Complete privacy, retention and organizational security reviews.",
+      ],
+      [
+        "No implied certifications",
+        "No claims of HIPAA, GDPR certification, SOC 2, clinical validation or enterprise security are made. Demo role checks are interface examples, not a production security boundary.",
+      ],
+    ],
+  },
+  contact: {
+    eyebrow: "Start a conversation",
+    title: "Let’s make the next shift clearer.",
+    lead: "Explore the demo with your team and evaluate whether AgraVeda’s operational workflows match your hospital’s needs.",
+    blocks: [
+      [
+        "Evaluate the workflow",
+        "Walk through the six-hour forecast, patient-flow constraints and resource scenarios with your ED and operations teams.",
+      ],
+      [
+        "Plan a pilot",
+        "Identify the operational data, governance requirements and identity integration needed for a reviewed hospital pilot.",
+      ],
+      [
+        "Contact availability",
+        "A contact channel has not been configured yet. No invented email address, phone number or unconnected message form is provided. For now, explore the demo workspace.",
+      ],
+    ],
+  },
+  privacy: {
+    eyebrow: "Demo privacy notice",
+    title: "Your information, clearly explained.",
+    lead: "This notice describes the current demo only. A hospital-ready privacy policy must be reviewed before production use.",
+    blocks: [
+      [
+        "Demo information",
+        "The application uses synthetic hourly operational records. It does not collect patient data. Demo role and session state are stored in sessionStorage for this browser tab.",
+      ],
+      [
+        "Form information",
+        "Sign-in and registration are not connected. Submitted form values do not create an account and are not saved by this application. Do not enter real passwords or sensitive information.",
+      ],
+      [
+        "Before production",
+        "Define a data controller, legal basis, retention and deletion policies, privacy contact, subprocessors and organizational agreements. Obtain the required reviews before connecting hospital data.",
+      ],
+    ],
+  },
+  terms: {
+    eyebrow: "Demo terms",
+    title: "Explore thoughtfully. Decide responsibly.",
+    lead: "AgraVeda is operational decision support — not clinical advice. These demo terms are not a substitute for a reviewed production agreement.",
+    blocks: [
+      [
+        "For evaluation only",
+        "All records are synthetic. Model outputs and scenarios are illustrative and must not be used to make patient-care or live hospital staffing decisions.",
+      ],
+      [
+        "Human judgment",
+        "Forecasts and recommendations use simplified operational assumptions. They are not clinically validated and may not reflect your hospital’s real constraints.",
+      ],
+      [
+        "Production use",
+        "Requires verified identity, server-enforced authorization, appropriate data agreements and formal security and clinical-governance review. No production service commitments are currently offered.",
+      ],
+    ],
+  },
 } as const;
-export type ContentKind=keyof typeof content;
-export function ContentPage({kind}:{kind:ContentKind}){const c=content[kind];return <><SiteHeader/><main><section className="content-page"><div className="container"><div className="eyebrow"><ShieldCheck size={13}/>{c.eyebrow}</div><h1>{c.title}</h1><p className="lead">{c.lead}</p><div className="content-grid">{c.blocks.map(([title,copy])=><article className="content-block" key={title}><h2>{title}</h2><p>{copy}</p></article>)}</div>{kind==='how-it-works'&&<div className="flow-row">{stages.map((s,i)=><div className="flow-step" key={s}><span>0{i+1}</span><h3>{s}</h3></div>)}</div>}<div className="mt-10"><Button variant="carbon" size="lg" asChild><Link to="/login">Explore the labelled demo <ArrowRight/></Link></Button></div></div></section>{!['terms','privacy','security'].includes(kind)&&<DemoCTA/>}</main><SiteFooter/></>}
+export type ContentKind = keyof typeof content;
+export function ContentPage({ kind }: { kind: ContentKind }) {
+  const c = content[kind];
+  return (
+    <>
+      <SiteHeader />
+      <main>
+        <section className="content-page">
+          <div className="container">
+            <div className="eyebrow">
+              <ShieldCheck size={13} />
+              {c.eyebrow}
+            </div>
+            <h1>{c.title}</h1>
+            <p className="lead">{c.lead}</p>
+            <div className="content-grid">
+              {c.blocks.map(([title, copy]) => (
+                <article className="content-block" key={title}>
+                  <h2>{title}</h2>
+                  <p>{copy}</p>
+                </article>
+              ))}
+            </div>
+            {kind === "how-it-works" && (
+              <div className="flow-row">
+                {stages.map((s, i) => (
+                  <div className="flow-step" key={s}>
+                    <span>0{i + 1}</span>
+                    <h3>{s}</h3>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="mt-10">
+              <Button variant="carbon" size="lg" asChild>
+                <Link to="/login">
+                  Explore the labelled demo <ArrowRight />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+        {!["terms", "privacy", "security"].includes(kind) && <DemoCTA />}
+      </main>
+      <SiteFooter />
+    </>
+  );
+}

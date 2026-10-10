@@ -1,8 +1,258 @@
-import {useState,type FormEvent} from 'react';
-import {Link,useNavigate} from '@tanstack/react-router';
-import {ArrowRight,Eye,EyeOff,ShieldCheck} from 'lucide-react';
-import {Button} from '@/components/ui/button';
-import {Brand} from './brand';
-import {authService,useAuth,roles,type Role} from '@/features/auth';
-import hospitalHero from '@/assets/hospital-hero.jpg';
-export function AuthScreen({signup=false}:{signup?:boolean}){const [visible,setVisible]=useState(false);const [message,setMessage]=useState('');const [forgot,setForgot]=useState(false);const [role,setRole]=useState<Role>('ED / Operations Lead');const [busy,setBusy]=useState(false);const {enterDemo}=useAuth();const navigate=useNavigate();async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setMessage('');const data=new FormData(e.currentTarget);try{if(forgot)await authService.resetPassword(String(data.get('email')));else if(signup)await authService.signUp({name:String(data.get('name')),email:String(data.get('email')),password:String(data.get('password')),organization:String(data.get('organization')),role});else await authService.signIn(String(data.get('email')),String(data.get('password')));}catch(error){setMessage(error instanceof Error?error.message:'Authentication is unavailable.');}finally{setBusy(false);}}function demo(){enterDemo(role);navigate({to:'/app'});}return <main className="auth-layout"><div className="auth-form-side"><Brand/><div className="auth-form"><div className="eyebrow"><ShieldCheck size={13}/>AgraVeda workspace</div><h1 className="mt-4">{forgot?'Reset your password':signup?'A clearer view starts here.':'Welcome back.'}</h1><p>{forgot?'Enter your work email to request a reset.':signup?'Bring your team’s operational picture into focus.':'Sign in to your hospital’s operational workspace.'}</p><div className="notice"><strong>Demo preview · Production authentication not connected</strong><br/>Email sign-in and account creation are not active. Explore with a labelled demo role below. Do not enter real credentials.</div><form onSubmit={submit}>{signup&&!forgot&&<div className="form-field"><label htmlFor="name">Full name</label><input id="name" name="name" placeholder="Your full name" required autoComplete="name"/></div>}<div className="form-field"><label htmlFor="email">Work email</label><input id="email" name="email" type="email" placeholder="you@hospital.org" required autoComplete="email"/></div>{!forgot&&<div className="form-field"><div className="flex justify-between"><label htmlFor="password">Password</label>{!signup&&<Button variant="link" size="sm" type="button" onClick={()=>{setForgot(true);setMessage('');}}>Forgot password?</Button>}</div><div className="password-wrap"><input id="password" name="password" type={visible?'text':'password'} minLength={8} placeholder="At least 8 characters" required autoComplete={signup?'new-password':'current-password'}/><Button variant="ghost" size="icon" type="button" aria-label={visible?'Hide password':'Show password'} onClick={()=>setVisible(!visible)}>{visible?<EyeOff/>:<Eye/>}</Button></div></div>}{signup&&!forgot&&<><div className="form-field"><label htmlFor="organization">Organization / hospital</label><input id="organization" name="organization" placeholder="Hospital name" required autoComplete="organization"/></div><div className="form-field"><label htmlFor="signup-role">Your role</label><select id="signup-role" value={role} onChange={e=>setRole(e.target.value as Role)}>{roles.map(r=><option key={r}>{r}</option>)}</select></div><label className="flex items-start gap-2 text-muted-foreground"><input type="checkbox" required className="mt-1 w-4"/><span>I agree to the <Link to="/terms" className="underline">Terms</Link> and <Link to="/privacy" className="underline">Privacy policy</Link>.</span></label></>}<Button className="w-full mt-4" variant="carbon" size="lg" disabled={busy}>{busy?'Checking…':forgot?'Request reset':signup?'Create account':'Sign in'}<ArrowRight/></Button>{message&&<p className="error-text" role="alert">{message}</p>}</form><Button className="w-full mt-3" variant="outline" disabled>Google sign-in — coming soon</Button>{forgot&&<Button variant="link" className="mt-3" onClick={()=>{setForgot(false);setMessage('');}}>Back to sign in</Button>}<div className="mt-8 border-t pt-6"><h2 className="text-sm">Explore a demo workspace</h2><p className="small-note mt-2">Synthetic records only. This role is not a verified identity.</p><div className="form-field"><label htmlFor="demo-role">Demo role</label><select id="demo-role" value={role} onChange={e=>setRole(e.target.value as Role)}>{roles.map(r=><option key={r}>{r}</option>)}</select></div><Button className="w-full" size="lg" onClick={demo}>View demo <ArrowRight/></Button></div><p className="small-note text-center mt-6">{signup?'Already have an account? ':'New to AgraVeda? '}<Link className="text-primary" to={signup?'/login':'/signup'}>{signup?'Sign in':'Get started'}</Link></p><p className="small-note text-center mt-5">Operational decision support — not clinical advice.</p></div></div><div className="auth-image"><img src={hospitalHero} alt="A physician in a bright hospital" width={1920} height={1024} onError={e=>{e.currentTarget.hidden=true;}}/><div className="auth-image-caption"><h2>For the people<br/>who keep care moving.</h2><p>One connected view of emergency demand, patient flow and the resources your team depends on.</p></div></div></main>}
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowRight, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Brand } from "./brand";
+import { authService, useAuth, roles, type Role } from "@/features/auth";
+import hospitalHero from "@/assets/hospital-hero.jpg";
+export function AuthScreen({ signup = false }: { signup?: boolean }) {
+  const [visible, setVisible] = useState(false);
+  const [message, setMessage] = useState("");
+  const [forgot, setForgot] = useState(false);
+  const [role, setRole] = useState<Role>("ED / Operations Lead");
+  const [busy, setBusy] = useState(false);
+  const { enterDemo } = useAuth();
+  const navigate = useNavigate();
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setBusy(true);
+    setMessage("");
+    const data = new FormData(e.currentTarget);
+    try {
+      if (forgot) await authService.resetPassword(String(data.get("email")));
+      else if (signup)
+        await authService.signUp({
+          name: String(data.get("name")),
+          email: String(data.get("email")),
+          password: String(data.get("password")),
+          organization: String(data.get("organization")),
+          role,
+        });
+      else await authService.signIn(String(data.get("email")), String(data.get("password")));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Authentication is unavailable.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  function demo() {
+    enterDemo(role);
+    navigate({ to: "/app" });
+  }
+  return (
+    <main className="auth-layout">
+      <div className="auth-form-side">
+        <Brand />
+        <div className="auth-form">
+          <div className="eyebrow">
+            <ShieldCheck size={13} />
+            AgraVeda workspace
+          </div>
+          <h1 className="mt-4">
+            {forgot
+              ? "Reset your password"
+              : signup
+                ? "A clearer view starts here."
+                : "Welcome back."}
+          </h1>
+          <p>
+            {forgot
+              ? "Enter your work email to request a reset."
+              : signup
+                ? "Bring your team’s operational picture into focus."
+                : "Sign in to your hospital’s operational workspace."}
+          </p>
+          <div className="notice">
+            <strong>Demo preview · Production authentication not connected</strong>
+            <br />
+            Email sign-in and account creation are not active. Explore with a labelled demo role
+            below. Do not enter real credentials.
+          </div>
+          <form onSubmit={submit}>
+            {signup && !forgot && (
+              <div className="form-field">
+                <label htmlFor="name">Full name</label>
+                <input
+                  id="name"
+                  name="name"
+                  placeholder="Your full name"
+                  required
+                  autoComplete="name"
+                />
+              </div>
+            )}
+            <div className="form-field">
+              <label htmlFor="email">Work email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@hospital.org"
+                required
+                autoComplete="email"
+              />
+            </div>
+            {!forgot && (
+              <div className="form-field">
+                <div className="flex justify-between">
+                  <label htmlFor="password">Password</label>
+                  {!signup && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      type="button"
+                      onClick={() => {
+                        setForgot(true);
+                        setMessage("");
+                      }}
+                    >
+                      Forgot password?
+                    </Button>
+                  )}
+                </div>
+                <div className="password-wrap">
+                  <input
+                    id="password"
+                    name="password"
+                    type={visible ? "text" : "password"}
+                    minLength={8}
+                    placeholder="At least 8 characters"
+                    required
+                    autoComplete={signup ? "new-password" : "current-password"}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    type="button"
+                    aria-label={visible ? "Hide password" : "Show password"}
+                    onClick={() => setVisible(!visible)}
+                  >
+                    {visible ? <EyeOff /> : <Eye />}
+                  </Button>
+                </div>
+              </div>
+            )}
+            {signup && !forgot && (
+              <>
+                <div className="form-field">
+                  <label htmlFor="organization">Organization / hospital</label>
+                  <input
+                    id="organization"
+                    name="organization"
+                    placeholder="Hospital name"
+                    required
+                    autoComplete="organization"
+                  />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="signup-role">Your role</label>
+                  <select
+                    id="signup-role"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as Role)}
+                  >
+                    {roles.map((r) => (
+                      <option key={r}>{r}</option>
+                    ))}
+                  </select>
+                </div>
+                <label className="flex items-start gap-2 text-muted-foreground">
+                  <input type="checkbox" required className="mt-1 w-4" />
+                  <span>
+                    I agree to the{" "}
+                    <Link to="/terms" className="underline">
+                      Terms
+                    </Link>{" "}
+                    and{" "}
+                    <Link to="/privacy" className="underline">
+                      Privacy policy
+                    </Link>
+                    .
+                  </span>
+                </label>
+              </>
+            )}
+            <Button className="w-full mt-4" variant="carbon" size="lg" disabled={busy}>
+              {busy
+                ? "Checking…"
+                : forgot
+                  ? "Request reset"
+                  : signup
+                    ? "Create account"
+                    : "Sign in"}
+              <ArrowRight />
+            </Button>
+            {message && (
+              <p className="error-text" role="alert">
+                {message}
+              </p>
+            )}
+          </form>
+          <Button className="w-full mt-3" variant="outline" disabled>
+            Google sign-in — coming soon
+          </Button>
+          {forgot && (
+            <Button
+              variant="link"
+              className="mt-3"
+              onClick={() => {
+                setForgot(false);
+                setMessage("");
+              }}
+            >
+              Back to sign in
+            </Button>
+          )}
+          <div className="mt-8 border-t pt-6">
+            <h2 className="text-sm">Explore a demo workspace</h2>
+            <p className="small-note mt-2">
+              Synthetic records only. This role is not a verified identity.
+            </p>
+            <div className="form-field">
+              <label htmlFor="demo-role">Demo role</label>
+              <select id="demo-role" value={role} onChange={(e) => setRole(e.target.value as Role)}>
+                {roles.map((r) => (
+                  <option key={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+            <Button className="w-full" size="lg" onClick={demo}>
+              View demo <ArrowRight />
+            </Button>
+          </div>
+          <p className="small-note text-center mt-6">
+            {signup ? "Already have an account? " : "New to AgraVeda? "}
+            <Link className="text-primary" to={signup ? "/login" : "/signup"}>
+              {signup ? "Sign in" : "Get started"}
+            </Link>
+          </p>
+          <p className="small-note text-center mt-5">
+            Operational decision support — not clinical advice.
+          </p>
+        </div>
+      </div>
+      <div className="auth-image">
+        <img
+          src={hospitalHero}
+          alt="A physician in a bright hospital"
+          width={1920}
+          height={1024}
+          onError={(e) => {
+            e.currentTarget.hidden = true;
+          }}
+        />
+        <div className="auth-image-caption">
+          <h2>
+            For the people
+            <br />
+            who keep care moving.
+          </h2>
+          <p>
+            One connected view of emergency demand, patient flow and the resources your team depends
+            on.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}

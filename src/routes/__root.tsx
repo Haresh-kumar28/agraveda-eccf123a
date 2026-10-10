@@ -82,13 +82,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "AgraVeda" },
-      { name: "description", content: "Emergency department demand and patient-flow operational decision support." },
-      
+      {
+        name: "description",
+        content: "Emergency department demand and patient-flow operational decision support.",
+      },
+
       { property: "og:title", content: "AgraVeda" },
-      { property: "og:description", content: "Emergency department demand and patient-flow operational decision support." },
+      {
+        property: "og:description",
+        content: "Emergency department demand and patient-flow operational decision support.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      
     ],
     links: [
       {
@@ -96,7 +101,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -125,7 +133,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <AuthProvider><OperationsProvider><Outlet /></OperationsProvider></AuthProvider> breaks all child routes. */}
-      <AuthProvider><OperationsProvider><Outlet /></OperationsProvider></AuthProvider>
+      <AuthProvider>
+        <OperationsProvider>
+          <Outlet />
+        </OperationsProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
