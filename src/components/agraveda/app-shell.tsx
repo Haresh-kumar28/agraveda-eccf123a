@@ -1,0 +1,297 @@
+import { useState, type ReactNode } from "react";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  LayoutDashboard,
+  ChartNoAxesCombined,
+  Workflow,
+  Users,
+  Layers,
+  SlidersHorizontal,
+  Lightbulb,
+  Database,
+  PanelLeftClose,
+  Menu,
+  Search,
+  Bell,
+  ChevronDown,
+  LogOut,
+  Info,
+  ArrowRight,
+  ShieldCheck,
+  X,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Brand } from "./brand";
+import { roles, useAuth, canAccess, type Section, type Role } from "@/features/auth";
+export const navigation = [
+  { section: "overview", label: "Overview", to: "/app", icon: LayoutDashboard },
+  { section: "forecast", label: "Forecast", to: "/app/forecast", icon: ChartNoAxesCombined },
+  { section: "patient-flow", label: "Patient flow", to: "/app/patient-flow", icon: Workflow },
+  { section: "resources", label: "Resources", to: "/app/resources", icon: Users },
+  { section: "scenarios", label: "Scenarios", to: "/app/scenarios", icon: Layers },
+  { section: "what-if", label: "What-if", to: "/app/what-if", icon: SlidersHorizontal },
+  { section: "decisions", label: "Decisions", to: "/app/decisions", icon: Lightbulb },
+  { section: "data-quality", label: "Data quality", to: "/app/data-quality", icon: Database },
+] as const;
+export function AppBoundary() {
+  const { session, ready, enterDemo } = useAuth();
+  const [role, setRole] = useState<Role>("ED / Operations Lead");
+  if (!ready)
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center text-muted-foreground"
+        role="status"
+      >
+        Loading workspace…
+      </div>
+    );
+  if (!session)
+    return (
+      <div className="container py-12">
+        <Brand />
+        <div className="max-w-xl mx-auto py-20">
+          <div className="eyebrow">
+            <ShieldCheck size={15} />
+            Workspace access
+          </div>
+          <h1 className="page-title mt-5">Explore a clearer operational picture.</h1>
+          <p className="page-description">
+            Sign-in is required for a production workspace. This preview has no connected identity
+            provider; you can enter a clearly labelled demo instead.
+          </p>
+          <div className="notice">
+            Synthetic records only. Demo roles do not verify your identity or grant access to real
+            hospital data.
+          </div>
+          <label htmlFor="boundary-role">Demo role</label>
+          <select id="boundary-role" value={role} onChange={(e) => setRole(e.target.value as Role)}>
+            {roles.map((r) => (
+              <option key={r}>{r}</option>
+            ))}
+          </select>
+          <div className="flex gap-3 mt-5">
+            <Button onClick={() => enterDemo(role)} size="lg">
+              View demo <ArrowRight />
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/login">Sign in</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  return <AppShell />;
+}
+function AppShell() {
+  const { session, signOut } = useAuth();
+  const navigate = useNavigate();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobile, setMobile] = useState(false);
+  const [search, setSearch] = useState("");
+  const [notifications, setNotifications] = useState(false);
+  const [profile, setProfile] = useState(false);
+  if (!session) return null;
+  const current = navigation.find((n) => n.to === path)?.label ?? "Overview";
+  const allowed = navigation.filter((n) => canAccess(session.role, n.section));
+  function logout() {
+    signOut();
+    navigate({ to: "/login", replace: true });
+  }
+  return (
+    <div className={`app-shell ${collapsed ? "collapsed" : ""} ${mobile ? "mobile-open" : ""}`}>
+      <aside className="app-sidebar">
+        <Brand />
+        <p className="small-note sidebar-label px-3 mb-4">OPERATIONAL WORKSPACE</p>
+        <nav className="sidebar-nav" aria-label="Workspace navigation">
+          {allowed.map((n) => (
+            <Link
+              to={n.to}
+              key={n.section}
+              title={n.label}
+              activeOptions={{ exact: true }}
+              onClick={() => setMobile(false)}
+            >
+              <n.icon />
+              <span className="sidebar-label">{n.label}</span>
+            </Link>
+          ))}
+        </nav>
+        <div className="sidebar-bottom">
+          <span className="badge mb-3">Demo workspace</span>
+          <p className="mb-4">
+            Synthetic operational data
+            <br />
+            No hospital connection
+          </p>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={() => {
+              setCollapsed(!collapsed);
+              setMobile(false);
+            }}
+          >
+            <PanelLeftClose />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mobile-app-toggle"
+            aria-label="Close navigation"
+            onClick={() => setMobile(false)}
+          >
+            <X />
+          </Button>
+        </div>
+      </aside>
+      <div className="app-main">
+        <header className="app-topbar">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mobile-app-toggle"
+              aria-label="Open workspace navigation"
+              onClick={() => setMobile(!mobile)}
+            >
+              <Menu />
+            </Button>
+            <div className="search-wrap">
+              <Search />
+              <input
+                aria-label="Search platform sections"
+                placeholder="Search the platform…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setSearch("");
+                }}
+              />
+              {search && (
+                <div className="search-results">
+                  {allowed
+                    .filter((n) => n.label.toLowerCase().includes(search.toLowerCase()))
+                    .map((n) => (
+                      <Link key={n.section} to={n.to} onClick={() => setSearch("")}>
+                        {n.label}
+                      </Link>
+                    ))}
+                  {!allowed.some((n) => n.label.toLowerCase().includes(search.toLowerCase())) && (
+                    <p className="small-note">No matching sections for this demo role.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="topbar-actions">
+            <span className="badge">
+              <span className="status-dot" />
+              Demo mode
+            </span>
+            <div className="profile-wrap">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Notifications"
+                aria-expanded={notifications}
+                onClick={() => {
+                  setNotifications(!notifications);
+                  setProfile(false);
+                }}
+              >
+                <Bell />
+              </Button>
+              {notifications && (
+                <div className="notification-menu">
+                  <h3 className="text-sm">Workspace notifications</h3>
+                  <p className="small-note mt-3">This is a synthetic workspace, not a live feed.</p>
+                  <Link
+                    to="/app/decisions"
+                    className="text-link mt-4"
+                    onClick={() => setNotifications(false)}
+                  >
+                    Review modeled pressure <ArrowRight size={14} />
+                  </Link>
+                </div>
+              )}
+            </div>
+            <div className="profile-wrap">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setProfile(!profile);
+                  setNotifications(false);
+                }}
+                aria-label="Open profile menu"
+                aria-expanded={profile}
+              >
+                <span className="profile-avatar">DV</span>
+                <span className="profile-name text-xs">Demo visitor</span>
+                <ChevronDown size={12} />
+              </Button>
+              {profile && (
+                <div className="profile-menu">
+                  <h3 className="text-sm">Demo visitor</h3>
+                  <p className="small-note mt-1">{session.role}</p>
+                  <p className="small-note mt-3">
+                    This role is not identity-verified. Change your demo role by signing out.
+                  </p>
+                  <Button variant="ghost" className="mt-4 w-full justify-start" onClick={logout}>
+                    <LogOut />
+                    Leave demo
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+        <div className="app-content">
+          <div className="breadcrumbs">
+            Workspace <span className="mx-2">/</span> {current}
+          </div>
+          <div className="demo-banner">
+            <Info />
+            <span>
+              <strong className="font-medium text-foreground">Synthetic demo data</strong> · 336
+              hourly records · 26 Sep–10 Oct 2026 · Original AgraVeda engines · Not a live hospital
+              feed
+            </span>
+          </div>
+          <Outlet />
+        </div>
+        <footer className="app-footer">
+          AgraVeda · Synthetic demo data · Operational decision support — not clinical advice.
+        </footer>
+      </div>
+    </div>
+  );
+}
+export function SectionAccess({ section, children }: { section: Section; children: ReactNode }) {
+  const { session } = useAuth();
+  if (!session) return null;
+  if (!canAccess(session.role, section))
+    return (
+      <div className="py-14 max-w-xl">
+        <div className="eyebrow">
+          <ShieldCheck size={16} />
+          Access limited for this demo role
+        </div>
+        <h1 className="page-title mt-5">A different view for a different role.</h1>
+        <p className="page-description">
+          {session.role} does not have access to this section. Leave the demo and choose Hospital
+          Administrator or ED / Operations Lead to explore planning controls.
+        </p>
+        <div className="flex gap-3 mt-6">
+          <Button asChild>
+            <Link to="/app">Back to overview</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/app/access-denied">View access details</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  return <>{children}</>;
+}

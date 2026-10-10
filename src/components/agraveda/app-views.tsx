@@ -1,0 +1,874 @@
+import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  RotateCcw,
+  Info,
+  ChartNoAxesCombined,
+  Download,
+  Check,
+  Activity,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useOperations } from "@/features/operations";
+import { useAuth, canAccess, type Section } from "@/features/auth";
+import { INPUT_EXPLANATIONS, type SimulationInputs } from "@/types";
+import type { WhatIfParams } from "@/engines/whatIfSimulator";
+import { ForecastChart } from "./chart";
+import { SectionAccess } from "./app-shell";
+import { stages } from "./site";
+function Heading({
+  title,
+  description,
+  reset = true,
+}: {
+  title: string;
+  description: string;
+  reset?: boolean;
+}) {
+  const { reset: resetAll } = useOperations();
+  return (
+    <div className="page-heading">
+      <div>
+        <h1 className="page-title">{title}</h1>
+        <p className="page-description">{description}</p>
+      </div>
+      {reset && (
+        <Button variant="outline" size="sm" onClick={resetAll}>
+          <RotateCcw />
+          Reset inputs
+        </Button>
+      )}
+    </div>
+  );
+}
+function Kpi({
+  label,
+  value,
+  unit,
+  context,
+}: {
+  label: string;
+  value: string | number;
+  unit?: string;
+  context: string;
+}) {
+  return (
+    <div className="kpi">
+      <div className="kpi-label">{label}</div>
+      <div className="kpi-value">
+        {value}
+        <small> {unit}</small>
+      </div>
+      <p className="kpi-context">{context}</p>
+    </div>
+  );
+}
+function Pressure() {
+  const { pressure } = useOperations();
+  return (
+    <div className="pressure-band">
+      <div>
+        <div className="eyebrow mb-2">
+          <span className="status-dot" />
+          Current operational pressure
+        </div>
+        <h2>
+          {pressure.level === "NORMAL"
+            ? "Within modeled capacity"
+            : pressure.level === "WATCH"
+              ? "Pressure is beginning to build"
+              : pressure.level === "HIGH"
+                ? "Elevated department pressure"
+                : "Capacity needs closer attention"}
+        </h2>
+        <p>{pressure.description}</p>
+      </div>
+      <div className="pressure-score">
+        {pressure.score}
+        <span> / 100</span>
+        <p className="small-note text-right">{pressure.level.toLowerCase()} · modeled</p>
+      </div>
+    </div>
+  );
+}
+function Actions({ full = false }: { full?: boolean }) {
+  const { recommendations, simulateAction } = useOperations();
+  const { session } = useAuth();
+  const navigate = useNavigate();
+  const canSimulate = session && canAccess(session.role, "what-if");
+  return (
+    <>
+      {recommendations.length === 0 ? (
+        <p className="small-note py-6">
+          No additional operational actions suggested for the current modeled state.
+        </p>
+      ) : (
+        (full ? recommendations : recommendations.slice(0, 2)).map((r) => (
+          <article className="recommendation" key={r.id}>
+            <div className="flex gap-3 items-center">
+              <span className="badge">{r.priority.toLowerCase()} priority</span>
+              <span className="small-note">{r.when}</span>
+            </div>
+            <h3>{r.action}</h3>
+            <p>{r.reason}</p>
+            {full && (
+              <>
+                <p className="mt-3">
+                  <strong className="text-foreground font-medium">Where:</strong> {r.where}
+                </p>
+                <ul>
+                  {r.rationale.map((reason, i) => (
+                    <li key={i}>{reason}</li>
+                  ))}
+                </ul>
+                <p>
+                  <strong className="text-foreground font-medium">Modeled impact:</strong>{" "}
+                  {r.impact}
+                </p>
+              </>
+            )}
+            <Button
+              variant="link"
+              size="sm"
+              className="px-0 mt-3"
+              onClick={() => {
+                if (canSimulate) {
+                  simulateAction();
+                  navigate({ to: "/app/what-if" });
+                } else navigate({ to: "/app/decisions" });
+              }}
+            >
+              {canSimulate ? "Compare in what-if" : "Review rationale"}
+              <ArrowRight />
+            </Button>
+          </article>
+        ))
+      )}
+    </>
+  );
+}
+export function Overview() {
+  const { current, forecast, bottlenecks, recent } = useOperations();
+  const { session } = useAuth();
+  const last = forecast.forecasts.at(-1);
+  const prior = recent.at(-2);
+  const avg = Math.round(recent.reduce((a, r) => a + r.arrivals, 0) / recent.length);
+  return (
+    <SectionAccess section="overview">
+      <Heading
+        title="Emergency department overview"
+        description="A connected picture of demand, flow and capacity — for the next operational decision."
+      />
+      <Pressure />
+      <div className="kpi-row">
+        <Kpi
+          label="Current occupancy"
+          value={Math.round((current.currentOccupancy / current.totalBeds) * 100)}
+          unit="%"
+          context={`${current.currentOccupancy} of ${current.totalBeds} beds · ${last ? `${Math.round((last.predictedOccupancy / current.totalBeds) * 100)}% projected at +6h` : "forecast unavailable"}`}
+        />
+        <Kpi
+          label="Arrivals per hour"
+          value={current.arrivals}
+          context={`24h synthetic average: ${avg} · ${prior ? `${current.arrivals - prior.arrivals >= 0 ? "+" : ""}${current.arrivals - prior.arrivals} vs prior hour` : "no comparison"}`}
+        />
+        <Kpi
+          label="Patients waiting"
+          value={current.waitingPatients}
+          context={`${current.averageWaitTime} min modeled wait · not a measured care outcome`}
+        />
+      </div>
+      <div className="app-columns">
+        <div>
+          <section className="panel">
+            <ForecastChart />
+            <p className="small-note mt-3">
+              Six-hour model only · Confidence is qualitative, not a calibrated probability
+              interval.
+            </p>
+          </section>
+          <section className="panel">
+            <h2>Recent demand trend</h2>
+            <p className="panel-subtitle">
+              Last 24 synthetic hourly records · {recent.at(0)?.timestamp.slice(11, 16)} to{" "}
+              {recent.at(-1)?.timestamp.slice(11, 16)} UTC
+            </p>
+            <div className="table-scroll">
+              <table className="resource-table">
+                <thead>
+                  <tr>
+                    <th>Period (UTC)</th>
+                    <th>Arrivals</th>
+                    <th>Occupied beds</th>
+                    <th>Waiting</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recent.slice(-5).map((r) => (
+                    <tr key={r.timestamp}>
+                      <td>{r.timestamp.slice(11, 16)}</td>
+                      <td>{r.arrivals}</td>
+                      <td>
+                        {r.currentOccupancy}/{r.totalBeds}
+                      </td>
+                      <td>{r.waitingPatients}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+        <div>
+          <section className="panel">
+            <span className="eyebrow">Primary bottleneck</span>
+            <h2 className="mt-3">{bottlenecks.primary.label}</h2>
+            <p className="panel-subtitle">{bottlenecks.primary.description}</p>
+            <div className="flex justify-between border-t py-4 text-xs">
+              <span className="text-muted-foreground">Available / required</span>
+              <span>
+                {bottlenecks.primary.available} / {bottlenecks.primary.required}
+              </span>
+            </div>
+            <p className="small-note">{bottlenecks.primary.impactDetail}</p>
+            <Button asChild variant="link" className="px-0 mt-4">
+              <Link to="/app/patient-flow">
+                Explore patient flow <ArrowRight />
+              </Link>
+            </Button>
+          </section>
+          <section className="panel">
+            <h2>Next operational actions</h2>
+            <p className="panel-subtitle">Engine-generated suggestions · review before acting</p>
+            <Actions />
+            {session && canAccess(session.role, "decisions") && (
+              <Link to="/app/decisions" className="text-link">
+                All recommendations <ArrowRight />
+              </Link>
+            )}
+          </section>
+        </div>
+      </div>
+    </SectionAccess>
+  );
+}
+type NumericKey = {
+  [K in keyof SimulationInputs]: SimulationInputs[K] extends number ? K : never;
+}[keyof SimulationInputs];
+const inputFields: { key: NumericKey; label: string; min: number; max: number; step?: number }[] = [
+  { key: "arrivalsPerHour", label: "Arrivals / hour", min: 0, max: 100 },
+  { key: "surgeMult", label: "Demand multiplier", min: 0.5, max: 3, step: 0.1 },
+  { key: "currentOccupancy", label: "Occupied beds", min: 0, max: 200 },
+  { key: "waitingPatients", label: "Patients waiting", min: 0, max: 200 },
+  { key: "departures", label: "Departures / hour", min: 0, max: 100 },
+  { key: "hour", label: "Hour of day (UTC)", min: 0, max: 23 },
+  { key: "dayOfWeek", label: "Day of week (0 = Sunday)", min: 0, max: 6 },
+  { key: "totalBeds", label: "Total treatment beds", min: 1, max: 200 },
+  { key: "availableBeds", label: "Available beds", min: 0, max: 200 },
+  { key: "nursesAvailable", label: "Nurses available", min: 0, max: 100 },
+  { key: "doctorsAvailable", label: "Doctors available", min: 0, max: 100 },
+  { key: "diagnosticCapacity", label: "Diagnostic capacity (legacy assumption)", min: 10, max: 10 },
+];
+function InputControls({ resources = false }: { resources?: boolean }) {
+  const { inputs, setInputs } = useOperations();
+  const [note, setNote] = useState("");
+  const fields = resources ? inputFields.slice(7) : inputFields.slice(0, 7);
+  function update(key: NumericKey, value: number) {
+    if (!Number.isFinite(value)) return;
+    setInputs((prev) => {
+      const next = { ...prev, [key]: value };
+      if (key === "totalBeds") {
+        next.currentOccupancy = Math.min(next.currentOccupancy, value);
+        next.availableBeds = Math.max(0, value - next.currentOccupancy);
+      }
+      if (key === "currentOccupancy") {
+        next.availableBeds = Math.max(0, prev.totalBeds - value);
+      }
+      if (key === "dayOfWeek") next.isWeekend = value === 0 || value === 6;
+      return next;
+    });
+    setNote(
+      "Inputs updated. Forecasts, pressure, bottlenecks and recommendations have been recalculated.",
+    );
+  }
+  return (
+    <>
+      <div className="controls-grid">
+        {fields.map((f) => (
+          <div className="form-field" key={f.key}>
+            <label htmlFor={`input-${f.key}`}>{f.label}</label>
+            <input
+              id={`input-${f.key}`}
+              type="number"
+              value={inputs[f.key]}
+              min={f.min}
+              max={
+                f.key === "currentOccupancy" || f.key === "availableBeds" ? inputs.totalBeds : f.max
+              }
+              step={f.step ?? 1}
+              disabled={f.key === "diagnosticCapacity"}
+              onChange={(e) =>
+                update(
+                  f.key,
+                  Math.max(
+                    f.min,
+                    Math.min(
+                      f.key === "currentOccupancy" || f.key === "availableBeds"
+                        ? inputs.totalBeds
+                        : f.max,
+                      Number(e.target.value),
+                    ),
+                  ),
+                )
+              }
+            />
+            <p className="small-note mt-2">
+              {f.key === "diagnosticCapacity"
+                ? "Original engine uses a fixed capacity of 10; this value is not editable."
+                : INPUT_EXPLANATIONS[f.key]}
+            </p>
+          </div>
+        ))}
+      </div>
+      {note && (
+        <p className="notice" role="status">
+          {note}
+        </p>
+      )}
+    </>
+  );
+}
+export function ForecastView() {
+  const { forecast } = useOperations();
+  return (
+    <SectionAccess section="forecast">
+      <Heading
+        title="Demand forecast"
+        description="Explore the next six hours, with transparent inputs and confidence notes."
+      />
+      <div className="app-columns">
+        <section className="panel">
+          <ForecastChart />
+          <p className="small-note">
+            MAE {forecast.mae.toFixed(2)} · RMSE {forecast.rmse.toFixed(2)} · Legacy in-sample
+            metrics include target inputs; not a predictive validation.
+          </p>
+        </section>
+        <section className="panel">
+          <h2>What's driving the forecast</h2>
+          <p className="panel-subtitle">
+            Historical patterns, recent trends and current conditions
+          </p>
+          {forecast.drivers.map((d, i) => (
+            <div className="flex justify-between gap-4 border-t py-4 text-xs" key={i}>
+              <span>{d.factor}</span>
+              <span className="badge">
+                {d.impact} · {d.direction}
+              </span>
+            </div>
+          ))}
+        </section>
+      </div>
+      <section className="panel">
+        <h2>Forecast inputs</h2>
+        <p className="panel-subtitle">
+          Changes flow through the original calculation pipeline immediately.
+        </p>
+        <InputControls />
+      </section>
+      <div className="notice">
+        Outbreak and custom presets preserve the original engine’s normal-pattern mapping with
+        adjusted arrivals. Forecast confidence is qualitative; there is no validated 24-hour model.
+      </div>
+    </SectionAccess>
+  );
+}
+export function PatientFlowView() {
+  const { current, bottlenecks } = useOperations();
+  const stageValues = [
+    `${current.arrivals}/hr`,
+    `${current.arrivals}/hr`,
+    current.waitingPatients,
+    current.doctorsAvailable,
+    current.diagnosticQueue,
+    `${current.currentOccupancy}/${current.totalBeds}`,
+    `${current.departures}/hr`,
+  ];
+  const details = [
+    "Incoming synthetic demand",
+    "Illustrative throughput; no triage rules",
+    "Patients waiting for assessment",
+    "Available doctors · modeled 1:6 ratio",
+    "Tests queued · fixed concurrent capacity 10",
+    "Treatment-bed occupancy",
+    "Expected departures · nursing ratio 1:4",
+  ];
+  return (
+    <SectionAccess section="patient-flow">
+      <Heading
+        title="Patient flow"
+        description="Seven connected stages. One view of where operational pressure is building."
+      />
+      <div className="app-flow">
+        {stages.map((s, i) => (
+          <article className="app-flow-item" key={s}>
+            <span className="eyebrow">
+              0{i + 1} · {i === 0 ? "Input" : i === 6 ? "Output" : "Flow stage"}
+            </span>
+            <h3>{s}</h3>
+            <strong>{stageValues[i]}</strong>
+            <p>{details[i]}</p>
+          </article>
+        ))}
+      </div>
+      <section className="panel mt-7">
+        <h2>Constraints across the flow</h2>
+        <p className="panel-subtitle">Primary modeled constraint: {bottlenecks.primary.label}</p>
+        <ResourceTable />
+      </section>
+      <div className="notice">
+        Aggregate operational view only. No patient-level tracking, clinical triage or individual
+        treatment recommendations.
+      </div>
+    </SectionAccess>
+  );
+}
+function ResourceTable() {
+  const { bottlenecks } = useOperations();
+  return (
+    <div className="table-scroll">
+      <table className="resource-table">
+        <thead>
+          <tr>
+            <th>Resource</th>
+            <th>Available</th>
+            <th>Required</th>
+            <th>Capacity gap</th>
+            <th>Projected utilization</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bottlenecks.all.map((b) => (
+            <tr key={b.resource}>
+              <td>
+                {b.label}
+                {b.isPrimary && <span className="badge ml-2">Primary</span>}
+              </td>
+              <td>{b.available}</td>
+              <td>{b.required}</td>
+              <td>
+                {b.gap >= 0 ? "+" : ""}
+                {b.gap}
+              </td>
+              <td>{Math.round(b.projectedUtilization)}%</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+export function ResourcesView() {
+  return (
+    <SectionAccess section="resources">
+      <Heading
+        title="Resources & capacity"
+        description="Connect available capacity with the demand your department may need to absorb."
+      />
+      <section className="panel">
+        <h2>Projected resource needs</h2>
+        <p className="panel-subtitle">
+          Original engine estimates. Staffing utilization uses required, not available staff;
+          inspect the capacity gap alongside percentages.
+        </p>
+        <ResourceTable />
+      </section>
+      <section className="panel">
+        <h2>Adjust available resources</h2>
+        <p className="panel-subtitle">
+          These controls change the shared baseline in this demo. Use What-if for isolated
+          comparisons.
+        </p>
+        <InputControls resources />
+      </section>
+      <div className="notice">
+        Nurse 1:4 and doctor 1:6 ratios are original modeling assumptions, not clinical staffing
+        standards. Diagnostic capacity is fixed at 10 by the legacy engine.
+      </div>
+      <Button asChild variant="outline">
+        <Link to="/app/what-if">
+          Compare without changing baseline <ArrowRight />
+        </Link>
+      </Button>
+    </SectionAccess>
+  );
+}
+const scenarioPresets: {
+  id: SimulationInputs["scenario"];
+  name: string;
+  copy: string;
+  mult: string;
+}[] = [
+  {
+    id: "normal",
+    name: "Baseline operations",
+    copy: "Reset to the original synthetic record with normal demand patterns.",
+    mult: "1.0× demand",
+  },
+  {
+    id: "accident_surge",
+    name: "Accident surge",
+    copy: "Model a sharp rise in arrivals and waiting demand with reduced bed availability.",
+    mult: "1.8× demand",
+  },
+  {
+    id: "weekend_peak",
+    name: "Weekend peak",
+    copy: "Explore the original weekend pattern with elevated occupancy and arrivals.",
+    mult: "1.1× demand",
+  },
+  {
+    id: "outbreak",
+    name: "Outbreak pressure",
+    copy: "Increase arrivals and waiting demand. Uses the normal historical-pattern model.",
+    mult: "1.5× demand",
+  },
+  {
+    id: "custom",
+    name: "Custom scenario",
+    copy: "Start from the baseline and tailor demand and resource inputs in Forecast.",
+    mult: "Editable inputs",
+  },
+];
+export function ScenariosView() {
+  const { inputs, selectScenario } = useOperations();
+  return (
+    <SectionAccess section="scenarios">
+      <Heading
+        title="Operational scenarios"
+        description="Compare plausible demand conditions using the original scenario presets."
+      />
+      <div className="scenario-grid">
+        {scenarioPresets.map((s) => (
+          <article
+            className={`scenario-card ${inputs.scenario === s.id ? "selected" : ""}`}
+            key={s.id}
+          >
+            <span className="badge mb-4">{s.mult}</span>
+            <h3>{s.name}</h3>
+            <p>{s.copy}</p>
+            <Button
+              variant={inputs.scenario === s.id ? "default" : "outline"}
+              onClick={() => selectScenario(s.id)}
+            >
+              {inputs.scenario === s.id ? (
+                <>
+                  <Check />
+                  Selected
+                </>
+              ) : (
+                "Apply scenario"
+              )}
+            </Button>
+          </article>
+        ))}
+      </div>
+      <div className="notice">
+        Applying a scenario resets inputs to the synthetic baseline before applying that preset, and
+        clears What-if changes. All other product views update together.
+      </div>
+      <div className="mt-7">
+        <Pressure />
+      </div>
+      <div className="panel mt-6">
+        <ForecastChart />
+      </div>
+    </SectionAccess>
+  );
+}
+const whatIfFields: { key: keyof WhatIfParams; label: string; max: number; unit: string }[] = [
+  { key: "additionalBeds", label: "Additional beds", max: 30, unit: "beds" },
+  { key: "additionalNurses", label: "Additional nurses", max: 20, unit: "nurses" },
+  { key: "additionalDoctors", label: "Additional doctors", max: 15, unit: "doctors" },
+  { key: "patientSurgePercent", label: "Arrival surge", max: 100, unit: "%" },
+];
+export function WhatIfView() {
+  const { params, setParams, whatIf, resetWhatIf } = useOperations();
+  return (
+    <SectionAccess section="what-if">
+      <Heading
+        title="What-if simulator"
+        description="Test an operational change. Compare modeled outcomes without changing your baseline."
+        reset={false}
+      />
+      <div className="app-columns">
+        <section className="panel">
+          <h2>Explore a resource or demand change</h2>
+          <p className="panel-subtitle">
+            Changes are calculated immediately using the original simulator.
+          </p>
+          {whatIfFields.map((f) => (
+            <div className="form-field py-2" key={f.key}>
+              <label htmlFor={`whatif-${f.key}`} className="range-label">
+                <span>{f.label}</span>
+                <span className="text-primary">
+                  {params[f.key]} {f.unit}
+                </span>
+              </label>
+              <input
+                id={`whatif-${f.key}`}
+                type="range"
+                min={0}
+                max={f.max}
+                value={params[f.key]}
+                onChange={(e) => setParams((p) => ({ ...p, [f.key]: Number(e.target.value) }))}
+              />
+              <div className="flex justify-between small-note mt-1">
+                <span>0</span>
+                <span>
+                  {f.max} {f.unit}
+                </span>
+              </div>
+            </div>
+          ))}
+          <Button variant="outline" onClick={resetWhatIf}>
+            <RotateCcw />
+            Reset comparison
+          </Button>
+        </section>
+        <section className="panel">
+          <h2>Projected impact</h2>
+          <p className="panel-subtitle">Baseline vs adjusted simulation · not measured outcomes</p>
+          <div className="comparison-grid">
+            <div className="comparison">
+              <h3>Baseline occupancy</h3>
+              <strong>{whatIf.baseline.occupancyPercent.toFixed(1)}%</strong>
+              <p className="small-note">{whatIf.baseline.pressureLevel.toLowerCase()} pressure</p>
+            </div>
+            <div className="comparison">
+              <h3>Simulated occupancy</h3>
+              <strong className="text-primary">
+                {whatIf.simulated.occupancyPercent.toFixed(1)}%
+              </strong>
+              <p className="small-note">{whatIf.simulated.pressureLevel.toLowerCase()} pressure</p>
+            </div>
+          </div>
+          <div className="quality-list">
+            <li>
+              <span>Modeled waiting time</span>
+              <span>
+                {whatIf.baseline.waitingTime} → {whatIf.simulated.waitingTime} min
+              </span>
+            </li>
+            <li>
+              <span>Pressure score</span>
+              <span>
+                {whatIf.baseline.pressureScore} → {whatIf.simulated.pressureScore}
+              </span>
+            </li>
+            <li>
+              <span>Available beds</span>
+              <span>
+                {whatIf.baseline.availableBeds} → {whatIf.simulated.availableBeds}
+              </span>
+            </li>
+            <li>
+              <span>Modeled constraint</span>
+              <span>{whatIf.simulated.bottleneck}</span>
+            </li>
+          </div>
+          <div className="notice" role="status">
+            {whatIf.impact.summary}
+          </div>
+          <p className="small-note">
+            Results are simplified estimates using fixed staffing ratios and a six-hour demand
+            forecast. No changes are sent to a hospital system.
+          </p>
+        </section>
+      </div>
+    </SectionAccess>
+  );
+}
+export function DecisionsView() {
+  return (
+    <SectionAccess section="decisions">
+      <Heading
+        title="Decisions & recommendations"
+        description="Understand what the engine suggests, where it applies and why."
+      />
+      <Pressure />
+      <div className="notice">
+        Operational decision support — not clinical advice. Recommendations are generated from
+        synthetic data and simplified assumptions. Review with qualified hospital leaders before any
+        real-world action.
+      </div>
+      <section className="panel">
+        <h2>Recommended operational considerations</h2>
+        <p className="panel-subtitle">
+          Transparent rationale from the original recommendation engine.
+        </p>
+        <Actions full />
+      </section>
+    </SectionAccess>
+  );
+}
+export function DataQualityView() {
+  const { quality, forecast } = useOperations();
+  function download() {
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          { source: "Synthetic demo", report: quality, forecastMetrics: forecast.metrics },
+          null,
+          2,
+        ),
+      ],
+      { type: "application/json" },
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "agraveda-demo-quality-report.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  return (
+    <SectionAccess section="data-quality">
+      <Heading
+        title="Data quality & lineage"
+        description="Know what’s behind your operational picture, and where its limitations begin."
+      />
+      <div className="kpi-row">
+        <Kpi
+          label="Records assessed"
+          value={quality.totalRecords}
+          context={`${quality.validRecords} valid hourly records · synthetic dataset`}
+        />
+        <Kpi
+          label="Completeness"
+          value={quality.completenessPercent.toFixed(1)}
+          unit="%"
+          context={`${quality.missingValueCount} missing values in assessed fields`}
+        />
+        <Kpi
+          label="Quality score"
+          value={quality.qualityScore.toFixed(1)}
+          unit="/ 100"
+          context={`${quality.overallQuality} · rule-based assessment`}
+        />
+      </div>
+      <div className="app-columns">
+        <section className="panel">
+          <h2>Record checks</h2>
+          <p className="panel-subtitle">
+            Original data-quality engine · structural checks, not source validation
+          </p>
+          <ul className="quality-list">
+            <li>
+              <span>Missing values</span>
+              <span>{quality.missingValueCount}</span>
+            </li>
+            <li>
+              <span>Potential outliers</span>
+              <span>{quality.outlierCount}</span>
+            </li>
+            <li>
+              <span>Timestamp issues</span>
+              <span>{quality.timestampIssues}</span>
+            </li>
+            <li>
+              <span>Enough data to run model</span>
+              <span>{quality.canRunModel ? "Yes" : "No"}</span>
+            </li>
+          </ul>
+          {quality.warnings.map((w, i) => (
+            <p className="notice" key={i}>
+              {w}
+            </p>
+          ))}
+          {quality.fallbackReason && <p className="notice">{quality.fallbackReason}</p>}
+          <Button variant="outline" onClick={download}>
+            <Download />
+            Export demo quality report
+          </Button>
+        </section>
+        <section className="panel">
+          <h2>Data lineage</h2>
+          <p className="panel-subtitle">No hospital system is connected.</p>
+          <ul className="quality-list">
+            <li>
+              <span>Source</span>
+              <span>Seeded synthetic generator</span>
+            </li>
+            <li>
+              <span>Period</span>
+              <span>26 Sep–10 Oct 2026</span>
+            </li>
+            <li>
+              <span>Frequency</span>
+              <span>Hourly · UTC</span>
+            </li>
+            <li>
+              <span>Patient identifiers</span>
+              <span>None</span>
+            </li>
+            <li>
+              <span>Forecast horizon</span>
+              <span>1–6 hours</span>
+            </li>
+          </ul>
+        </section>
+      </div>
+      <section className="panel">
+        <h2>What these checks cannot tell you</h2>
+        <div className="content-grid mt-5">
+          <div>
+            <h3 className="text-sm mb-2">Not a validation study</h3>
+            <p className="small-note">
+              Completeness does not establish accuracy, representativeness or fitness for live
+              hospital decisions. MAE and RMSE are demo model metrics.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm mb-2">Simplified assumptions</h3>
+            <p className="small-note">
+              Fixed nurse 1:4 and doctor 1:6 ratios, diagnostic capacity 10 and arrivals-linked
+              departures are modeling assumptions. Legacy bed availability and staffing-utilization
+              definitions can differ from physical capacity.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm mb-2">Before connecting real data</h3>
+            <p className="small-note">
+              Review mappings, data freshness, outliers, missing values, privacy, source validation
+              and local calibration with your hospital team.
+            </p>
+          </div>
+        </div>
+      </section>
+    </SectionAccess>
+  );
+}
+export function AccessDeniedView() {
+  return (
+    <div className="max-w-xl py-10">
+      <div className="eyebrow">Demo access model</div>
+      <h1 className="page-title mt-5">This workspace adapts to your role.</h1>
+      <p className="page-description">
+        Administrators and ED / Operations Leads can access all sections. Clinicians and care
+        coordinators see Overview, Patient flow and Decisions. Analysts can explore forecasting and
+        quality, but not resource management or Decisions.
+      </p>
+      <div className="notice">
+        These are demo interface permissions only. Production access must be enforced by a verified
+        identity provider and server-side authorization.
+      </div>
+      <Button asChild>
+        <Link to="/app">
+          Return to overview <ArrowRight />
+        </Link>
+      </Button>
+    </div>
+  );
+}

@@ -1,0 +1,525 @@
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  Menu,
+  X,
+  Plus,
+  Activity,
+  ChartNoAxesCombined,
+  Workflow,
+  Users,
+  Hospital,
+  ShieldCheck,
+  Stethoscope,
+  HeartPulse,
+  Building2,
+  Check,
+  Clock3,
+  ScanLine,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Brand } from "./brand";
+import { ForecastChart } from "./chart";
+import { useOperations } from "@/features/operations";
+import { useAuth } from "@/features/auth";
+import hospitalHero from "@/assets/hospital-hero.jpg";
+export const stages = [
+  "Arrival",
+  "Triage",
+  "Waiting",
+  "Doctor assessment",
+  "Diagnostics",
+  "Treatment",
+  "Disposition",
+];
+export function SiteHeader() {
+  const [open, setOpen] = useState(false);
+  const { session } = useAuth();
+  return (
+    <>
+      <header className="container site-header">
+        <Brand />
+        <nav className="site-nav" aria-label="Main navigation">
+          <Link to="/product">Product</Link>
+          <Link to="/how-it-works">How it works</Link>
+          <Link to="/for-hospitals">For hospitals</Link>
+          <Link to="/security">Security</Link>
+          <Link to="/contact">Contact</Link>
+        </nav>
+        <div className="header-actions">
+          <Link className="login-link" to={session ? "/app" : "/login"}>
+            {session ? "Open platform" : "Log in"}
+          </Link>
+          <Button variant="carbon" asChild>
+            <Link to="/signup">
+              Get started <ArrowRight size={14} />
+            </Link>
+          </Button>
+          <Button
+            className="mobile-menu"
+            variant="ghost"
+            size="icon"
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <X /> : <Menu />}
+          </Button>
+        </div>
+      </header>
+      {open && (
+        <nav className="container flex flex-col gap-4 border-t py-6" aria-label="Mobile navigation">
+          <Link to="/product" onClick={() => setOpen(false)}>
+            Product
+          </Link>
+          <Link to="/how-it-works" onClick={() => setOpen(false)}>
+            How it works
+          </Link>
+          <Link to="/for-hospitals" onClick={() => setOpen(false)}>
+            For hospitals
+          </Link>
+          <Link to="/security" onClick={() => setOpen(false)}>
+            Security
+          </Link>
+          <Link to="/contact" onClick={() => setOpen(false)}>
+            Contact
+          </Link>
+          <Link to="/login" onClick={() => setOpen(false)}>
+            Log in
+          </Link>
+        </nav>
+      )}
+    </>
+  );
+}
+export function SiteFooter() {
+  return (
+    <footer className="footer">
+      <div className="container">
+        <div className="footer-grid">
+          <div>
+            <Brand />
+            <p>
+              A clearer view of demand, capacity and patient flow. Built around the people who keep
+              emergency care moving.
+            </p>
+          </div>
+          <div>
+            <h4>Platform</h4>
+            <div className="footer-links">
+              <Link to="/product">Product overview</Link>
+              <Link to="/how-it-works">How it works</Link>
+              <Link to="/login">Explore the demo</Link>
+            </div>
+          </div>
+          <div>
+            <h4>AgraVeda</h4>
+            <div className="footer-links">
+              <Link to="/for-hospitals">For hospitals</Link>
+              <Link to="/security">Security & trust</Link>
+              <Link to="/contact">Contact</Link>
+            </div>
+          </div>
+          <div>
+            <h4>Get connected</h4>
+            <div className="footer-links">
+              <Link to="/signup">
+                Get started <ArrowRight size={12} />
+              </Link>
+              <Link to="/login">Sign in</Link>
+              <Link to="/privacy">Privacy</Link>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span>© 2026 AgraVeda. All rights reserved.</span>
+          <span>Operational decision support — not clinical advice.</span>
+          <div className="flex gap-5">
+            <Link to="/privacy">Privacy policy</Link>
+            <Link to="/terms">Terms of use</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+export function DemoCTA() {
+  return (
+    <section className="cta-band">
+      <div className="container cta-inner">
+        <div>
+          <h2>Make room for a clearer tomorrow.</h2>
+          <p>See what a more connected view of your emergency department can look like.</p>
+        </div>
+        <Button variant="carbon" size="lg" asChild>
+          <Link to="/login">
+            Explore the platform <ArrowRight />
+          </Link>
+        </Button>
+      </div>
+    </section>
+  );
+}
+const capabilities = [
+  {
+    icon: ChartNoAxesCombined,
+    title: "Forecast demand",
+    copy: "See near-term arrivals and occupancy earlier. Understand the signals behind each forecast, not just the numbers.",
+    link: "See demand forecasting",
+  },
+  {
+    icon: Workflow,
+    title: "Understand bottlenecks",
+    copy: "Connect the seven stages of patient flow. Know where pressure is building and what is contributing to it.",
+    link: "Explore patient flow",
+  },
+  {
+    icon: Users,
+    title: "Plan resources",
+    copy: "Explore staffing and capacity scenarios before making a move. Compare the possible impact in one clear view.",
+    link: "Discover resource planning",
+  },
+];
+const faq = [
+  [
+    "What does AgraVeda help our team do?",
+    "AgraVeda brings demand forecasting, patient-flow constraints, resource planning and operational recommendations into one workspace. It supports human operational decisions; it does not diagnose, triage or recommend clinical treatment.",
+  ],
+  [
+    "Can we explore the platform before connecting hospital data?",
+    "Yes. The labelled demo uses 336 synthetic hourly records. Choose a demo role and explore the original forecasting and simulation calculations. No hospital connection or verified account is created.",
+  ],
+  [
+    "How far ahead does the forecast look?",
+    "The current engine projects the next six hours using historical hourly patterns, recent trends and the current department state. Confidence is qualitative and decreases with the horizon. A validated 24-hour forecast is not currently available.",
+  ],
+  [
+    "Who is the platform designed for?",
+    "ED and operations leads, hospital administrators, clinicians, nurses and data analysts. The demo has role-based views to illustrate different workflows, not enforce production security.",
+  ],
+  [
+    "How is patient data handled?",
+    "This demo contains synthetic operational records only, without patient identifiers. Production use requires a connected identity provider, server-enforced permissions, a reviewed data connection and organizational privacy and security approval.",
+  ],
+];
+export function Landing() {
+  const { current, pressure } = useOperations();
+  return (
+    <>
+      <SiteHeader />
+      <main>
+        <section className="hero">
+          <img
+            src={hospitalHero}
+            alt="A physician in a bright hospital corridor"
+            width={1920}
+            height={1024}
+            fetchPriority="high"
+            onError={(e) => {
+              e.currentTarget.hidden = true;
+            }}
+          />
+          <div className="container hero-content reveal">
+            <div className="eyebrow">
+              <span className="status-dot" />
+              Clarity for the moments that matter
+            </div>
+            <h1>
+              A clearer view of
+              <br />
+              emergency care.
+            </h1>
+            <p className="hero-description">
+              Anticipate demand. Understand patient flow.
+              <br />
+              Plan the right resources — before pressure builds.
+              <br />
+              One connected view for better operational decisions.
+            </p>
+            <div className="hero-actions">
+              <Button variant="carbon" size="lg" asChild>
+                <Link to="/login">
+                  Explore the platform <ArrowRight />
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/login">Sign in</Link>
+              </Button>
+            </div>
+            <div className="hero-note">
+              <ShieldCheck size={13} /> Built for hospital teams. Designed around people.
+            </div>
+          </div>
+          <span className="hero-photo-note">Illustrative healthcare image</span>
+        </section>
+        <section className="trust-strip">
+          <div className="container trust-inner">
+            <p className="trust-label">
+              Built for clearer
+              <br />
+              operational decisions
+            </p>
+            <div className="trust-item">
+              <Hospital />
+              Emergency departments
+            </div>
+            <div className="trust-item">
+              <HeartPulse />
+              Care teams
+            </div>
+            <div className="trust-item">
+              <Activity />
+              Hospital operations
+            </div>
+            <div className="trust-item">
+              <Building2 />
+              Health systems
+            </div>
+          </div>
+        </section>
+        <section className="section">
+          <div className="container">
+            <div className="section-heading">
+              <div>
+                <div className="eyebrow">A connected perspective</div>
+                <h2>
+                  Less uncertainty.
+                  <br />
+                  More room to plan.
+                </h2>
+              </div>
+              <p className="section-intro">
+                From the next arrival to the next shift, bring the signals that matter into focus —
+                with a platform built for the reality of emergency care.
+              </p>
+            </div>
+            <div className="capabilities">
+              {capabilities.map((c) => (
+                <article className="capability" key={c.title}>
+                  <div className="icon-wash">
+                    <c.icon size={22} />
+                  </div>
+                  <h3>{c.title}</h3>
+                  <p>{c.copy}</p>
+                  <Link className="text-link" to="/product">
+                    {c.link}
+                    <ArrowRight />
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="section section-wash">
+          <div className="container">
+            <div className="section-heading">
+              <div>
+                <div className="eyebrow">Every stage. One view.</div>
+                <h2>
+                  Follow the flow.
+                  <br />
+                  Find the friction.
+                </h2>
+              </div>
+              <p className="section-intro">
+                Emergency care is connected. Your operational view should be too. Trace pressure
+                across seven stages of the patient journey.
+              </p>
+            </div>
+            <div className="flow-row">
+              {stages.map((s, i) => (
+                <div className="flow-step" key={s}>
+                  <span>0{i + 1}</span>
+                  <h3>{s}</h3>
+                  {i < 6 && <ArrowRight />}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="section">
+          <div className="container impact-layout">
+            <div>
+              <div className="eyebrow">Built for practical clarity</div>
+              <h2>
+                A little foresight.
+                <br />A meaningful difference.
+              </h2>
+              <p className="section-intro mt-5">
+                Explore operational pressure before it becomes a bottleneck. Compare options, align
+                your team and plan with a shared understanding.
+              </p>
+              <p className="small-note mt-6">
+                Illustrative platform scope. Not measured clinical outcomes.
+              </p>
+            </div>
+            <div className="impact-numbers">
+              <div className="impact-number">
+                <strong>6 hours</strong>
+                <span>Near-term forecast horizon</span>
+              </div>
+              <div className="impact-number">
+                <strong>7 stages</strong>
+                <span>A connected patient-flow view</span>
+              </div>
+              <div className="impact-number">
+                <strong>4 resources</strong>
+                <span>Beds, nurses, doctors & diagnostics</span>
+              </div>
+              <div className="impact-number">
+                <strong>One view</strong>
+                <span>To bring your team together</span>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="section section-wash">
+          <div className="container preview-layout">
+            <div className="preview-copy">
+              <div className="eyebrow">Your operational command center</div>
+              <h2>
+                The big picture.
+                <br />
+                The details that matter.
+              </h2>
+              <p>
+                Demand, occupancy, constraints and recommendations — thoughtfully brought together.
+                Clear enough for a quick check. Detailed enough for the next decision.
+              </p>
+              <div className="flex flex-col gap-3 mb-7 text-xs text-muted-foreground">
+                <span className="flex gap-2">
+                  <Check size={15} className="text-primary" />
+                  Forecasts with context and confidence
+                </span>
+                <span className="flex gap-2">
+                  <Check size={15} className="text-primary" />
+                  Recommendations with transparent rationale
+                </span>
+                <span className="flex gap-2">
+                  <Check size={15} className="text-primary" />
+                  What-if comparisons without changing live operations
+                </span>
+              </div>
+              <Button variant="carbon" size="lg" asChild>
+                <Link to="/login">
+                  Take a closer look <ArrowRight />
+                </Link>
+              </Button>
+            </div>
+            <div className="preview-frame">
+              <div className="preview-bar">
+                <span className="flex items-center gap-2">
+                  <Activity size={16} className="text-primary" />
+                  AgraVeda <span className="text-muted-foreground">/ Overview</span>
+                </span>
+                <span className="badge">Synthetic demo</span>
+              </div>
+              <div className="preview-body">
+                <div className="flex items-center justify-between">
+                  <h3>Emergency department overview</h3>
+                  <span className="badge">{pressure.level.toLowerCase()}</span>
+                </div>
+                <div className="preview-stats">
+                  <div>
+                    <span>Current occupancy</span>
+                    <strong>
+                      {Math.round((current.currentOccupancy / current.totalBeds) * 100)}
+                      <small className="text-sm">%</small>
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Arrivals / hour</span>
+                    <strong>{current.arrivals}</strong>
+                  </div>
+                  <div>
+                    <span>Available beds</span>
+                    <strong>{current.availableBeds}</strong>
+                  </div>
+                </div>
+                <ForecastChart compact />
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="section">
+          <div className="container">
+            <div className="section-heading">
+              <div>
+                <div className="eyebrow">For the people behind the care</div>
+                <h2>
+                  Different roles.
+                  <br />A shared direction.
+                </h2>
+              </div>
+              <p className="section-intro">
+                Give every team a clearer understanding of what's happening now, and what might
+                happen next.
+              </p>
+            </div>
+            <div className="role-grid">
+              {[
+                {
+                  icon: HeartPulse,
+                  title: "ED leaders",
+                  copy: "Stay ahead of demand and coordinate the next operational move.",
+                },
+                {
+                  icon: Stethoscope,
+                  title: "Clinicians & care teams",
+                  copy: "Understand flow pressure and the resources supporting your team.",
+                },
+                {
+                  icon: ChartNoAxesCombined,
+                  title: "Operations analysts",
+                  copy: "Explore forecast drivers, scenarios and data quality in context.",
+                },
+                {
+                  icon: Building2,
+                  title: "Hospital administrators",
+                  copy: "See capacity needs and align planning across the department.",
+                },
+              ].map((r) => (
+                <article className="role-item" key={r.title}>
+                  <r.icon />
+                  <h3>{r.title}</h3>
+                  <p>{r.copy}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="section section-wash">
+          <div className="container faq-layout">
+            <div>
+              <div className="eyebrow">A few things worth knowing</div>
+              <h2>
+                Clarity starts
+                <br />
+                with a conversation.
+              </h2>
+              <p className="section-intro mt-5">
+                Have a question about bringing AgraVeda to your hospital?
+              </p>
+              <Link to="/contact" className="text-link mt-6">
+                Let's talk <ArrowRight />
+              </Link>
+            </div>
+            <div>
+              {faq.map(([q, a], i) => (
+                <details className="faq-item" key={q} open={i === 0}>
+                  <summary>
+                    {q}
+                    <Plus size={16} className="shrink-0 text-muted-foreground" />
+                  </summary>
+                  <p>{a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+        <DemoCTA />
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
